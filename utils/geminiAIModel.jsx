@@ -17,5 +17,5 @@ export async function generateInterviewQuestions(prompt) {
     ],
   });
 
-  return response.text;
+  return response.candidates[0].content.parts[0].text;
 }
