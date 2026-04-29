@@ -38,24 +38,54 @@ function AddNewInterview() {
   setLoading(true);
 
   try {
-    const InputPrompt =
-      "Job Position: " + jobPosition +
-      ", Job Description: " + jobDescription +
-      ", Years of Experience: " + jobExperience +
-      ", Depends on this information please give me " +
-      process.env.NEXT_PUBLIC_INTERVIEW_QUESTION_COUNT +
-      " Interview question with Answered in Json Format, Give Question and Answered as field on JSON";
+    const InputPrompt = `
+      Job Position: ${jobPosition}
+      Job Description: ${jobDescription}
+      Years of Experience: ${jobExperience}
 
+      Generate ${process.env.NEXT_PUBLIC_INTERVIEW_QUESTION_COUNT} interview questions with answers.
+
+     Return response EXACTLY like this:
+
+     START_JSON
+     [
+      {
+        "question": "Your question here",
+       "answer": "Your answer here"
+      }
+     ]
+     END_JSON
+
+     Rules:
+      - Only JSON inside START_JSON and END_JSON
+      - No explanation
+      - No extra text
+      `;
     const result = await generateInterviewQuestions(InputPrompt);
+    if (!result || result.includes("Server is busy")) {
+  throw new Error("Server busy");
+}
 
-    const jsonMatch = result.match(/\[.*\]/s);
+console.log("AI RAW RESPONSE:", result);
 
-    if (!jsonMatch) {
-      throw new Error("No valid JSON found in AI response");
-    }
+let parsedData;
 
-    const parsedData = JSON.parse(jsonMatch[0]);
+// Try marker-based parsing first
+let match = result.match(/START_JSON([\s\S]*?)END_JSON/);
 
+if (match) {
+  parsedData = JSON.parse(match[1].trim());
+} else {
+  // fallback: try normal JSON array
+  const fallback = result.match(/\[[\s\S]*\]/);
+
+  if (!fallback) {
+    console.error("AI RESPONSE:", result);
+    throw new Error("No valid JSON found in AI response");
+  }
+
+  parsedData = JSON.parse(fallback[0]);
+}
     console.log(parsedData);
 
     setJsonResponse(parsedData);
@@ -81,7 +111,15 @@ function AddNewInterview() {
 
   } catch (error) {
     console.error("Error generating interview:", error);
-  }
+
+   if (error.message.includes("Server busy")) {
+      alert("⚠️ AI is busy. Please try again.");
+   }
+
+   if (error.message.includes("Quota")) {
+      alert("⚠️ API quota exceeded. Please wait and try later.");
+   }
+}
 
   setLoading(false);
 };
@@ -143,4 +181,4 @@ function AddNewInterview() {
   );
 }
 
-export default AddNewInterview;
+export default AddNewInterview;   
