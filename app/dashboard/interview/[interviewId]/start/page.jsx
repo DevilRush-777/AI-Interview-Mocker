@@ -20,7 +20,7 @@ function StartInterview() {
 
     useEffect(() => {
         GetInterviewDetails();
-    }, [])
+    }, []);
 
     const GetInterviewDetails = async () => {
         const result = await db.select()
@@ -30,7 +30,7 @@ function StartInterview() {
         const jsonMockResp = JSON.parse(result[0].jsonMockResp);
         setMockInterviewQuestion(jsonMockResp);
         setInterviewData(result[0]);
-    }
+    };
 
     const isLastQuestion = activeQuestionIndex === mockInterviewQuestion.length - 1;
 
@@ -54,14 +54,15 @@ function StartInterview() {
 
             {/* Navigation Buttons */}
             <div className='flex justify-end gap-4 mt-8 mb-6'>
-                {/* Next Question button — hidden on last question */}
+
+                {/* Next Question — hidden on last question */}
                 {!isLastQuestion && (
                     <Button
                         onClick={() => setActiveQuestionIndex((prev) => prev + 1)}
-                        className="flex items-center gap-2"
+                        className='flex items-center gap-2'
                     >
                         Next Question
-                        <ArrowRight className="h-4 w-4" />
+                        <ArrowRight className='h-4 w-4' />
                     </Button>
                 )}
 
@@ -75,13 +76,13 @@ function StartInterview() {
                                 : 'border-red-400 text-red-500 hover:bg-red-50'
                         }`}
                     >
-                        <LogOut className="h-4 w-4" />
+                        <LogOut className='h-4 w-4' />
                         End Interview
                     </Button>
                 </Link>
             </div>
         </div>
-    )
+    );
 }
 
 export default StartInterview;
